@@ -9,6 +9,13 @@ import "fmt"
 // http://stackoverflow.com/questions/15049903/how-to-use-custom-packages-in-golang
 // import "/pl-project/storeLibs" // Not working? according to above it should
 
+type customer struct {
+	id                 int
+	serviceDurationSec int
+}
+
+
+
 func main() {
 	//fmt.Println(customer{0, 5})
 	fmt.Println("Test")
