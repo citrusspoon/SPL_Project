@@ -107,7 +107,6 @@ func (queue *Queue) dequeue() {
 	}
 
 	if queue.first == queue.last {
-		queue.first = nil
 		queue.last = nil
 	}
 
