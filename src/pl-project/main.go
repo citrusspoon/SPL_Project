@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -36,16 +37,31 @@ func main() {
 
 	fmt.Println("Empty?: ", queue.isEmpty())
 
-	for i := 0; i < 10; i++ {
-		queue.enqueue(MakeCustomer()) // 10 Customers go in line with IDs 1-10
-	}
+	minutes := 10
 
-	for j := 0; j < 4; j++ {
-		queue.dequeue() // Customers 1-4 are serviced, line now has 5-10
+	for j := 0; j < 60*minutes; j++ {
+		if isCustomerAdded() {
+			customer := MakeCustomer()
+			fmt.Println("New Customer is in the line!", customer.toString())
+			queue.enqueue(customer)
+		}
+
+		if queue.peek() != nil && queue.peek().service() {
+			fmt.Println("Customer with ID", queue.peek().id, "has been serviced.")
+			queue.dequeue()
+		}
 	}
 
 	queue.printContents()
-	fmt.Println("Queue Size: ", queue.size)
+	fmt.Println("Queue Size: ", queue.size, " peek ", queue.peek().serviceDurationSec)
+}
+
+func isCustomerAdded() bool {
+	s := rand.NewSource(time.Now().UnixNano() + int64(rand.Intn(1000000)))
+	r := rand.New(s)
+
+	// 1% chance someone is added per second
+	return r.Intn(100) == 0
 }
 
 type Customer struct {
@@ -58,8 +74,18 @@ func (customer *Customer) decServiceTime() {
 	customer.serviceDurationSec--
 }
 
-func (customer Customer) hasBeenServiced() bool {
+// returns true if the customer has finished being serviced, false otherwise
+func (customer *Customer) service() bool {
+	customer.decServiceTime()
+	return customer.hasBeenServiced()
+}
+
+func (customer *Customer) hasBeenServiced() bool {
 	return customer.serviceDurationSec <= 0
+}
+
+func (customer *Customer) toString() string {
+	return "ID: " + strconv.Itoa(customer.id) + ", Service Time (seconds): " + strconv.Itoa(customer.serviceDurationSec)
 }
 
 func MakeCustomer() *Customer {
@@ -113,6 +139,10 @@ func (queue *Queue) dequeue() {
 	queue.first = queue.first.nextCustomer
 
 	queue.size--
+}
+
+func (queue *Queue) peek() *Customer {
+	return queue.first
 }
 
 func (queue *Queue) printContents() {
