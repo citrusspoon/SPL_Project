@@ -34,6 +34,16 @@ func buyItem(index int) bool {
 	return true
 }
 
+func Price(items []*Item) *Money {
+	money := &Money{0, 0}
+
+	for _, item := range items {
+		money.Add(item.Price)
+	}
+
+	return money
+}
+
 func GetItems() []*Item {
 	var items []*Item
 

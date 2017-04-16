@@ -30,7 +30,7 @@ func (customer *Customer) HasBeenServiced() bool {
 }
 
 func (customer *Customer) ToString() string {
-	return "ID: " + strconv.Itoa(customer.ID) + ", Service Time (seconds): " + strconv.Itoa(customer.ServiceDurationSec)
+	return "ID: " + strconv.Itoa(customer.ID) + ", Service Time (seconds): " + strconv.Itoa(customer.ServiceDurationSec) + ", Price of items: " + Price(customer.Items).ToString()
 }
 
 func MakeCustomer() *Customer {

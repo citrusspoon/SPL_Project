@@ -10,6 +10,7 @@ import (
 
 func main() {
 
+	register := store.MakeRegister()
 	queue := store.MakeQueue()
 
 	minutes := 10
@@ -23,7 +24,11 @@ func main() {
 
 		if queue.Peek() != nil && queue.Peek().Service() {
 			fmt.Println("Customer with ID", queue.Peek().ID, "has been serviced.")
+			register.Money.Add(store.Price(queue.Peek().Items))
 			queue.Dequeue()
 		}
 	}
+
+	fmt.Println("\n\nFinished running for", minutes, "minutes!")
+	fmt.Println("In this time, register", register.ID, "made", register.Money.ToString())
 }
