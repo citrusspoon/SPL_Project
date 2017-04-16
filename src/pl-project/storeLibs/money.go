@@ -16,5 +16,13 @@ func (money *Money) Add(other *Money) {
 }
 
 func (money *Money) ToString() string {
-	return "$" + strconv.Itoa(money.Dollars) + "." + strconv.Itoa(money.Pennies)
+	var pennies string
+
+	if money.Pennies < 10 {
+		pennies = "0" + strconv.Itoa(money.Pennies)
+	} else {
+		pennies = strconv.Itoa(money.Pennies)
+	}
+
+	return "$" + strconv.Itoa(money.Dollars) + "." + pennies
 }
