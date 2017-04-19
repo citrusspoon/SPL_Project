@@ -59,13 +59,18 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	//"time"
+	"math/rand"
 	//"strings"
 )
 
 func main() {
 
 	
-fmt.Println(trueRandomSeed())
+	s := rand.NewSource(trueRandomSeed())
+	r := rand.New(s)
+
+	fmt.Println(r.Intn(100))
 
 	
 
@@ -75,7 +80,7 @@ fmt.Println(trueRandomSeed())
 func trueRandomSeed() int64{
 
 	//Random.org true random number generator. Change the "len" number in the url to change the length
-	url := "https://www.random.org/strings/?num=1&len=5&digits=on&unique=on&format=plain&rnd=new" 
+	url := "https://www.random.org/strings/?num=1&len=18&digits=on&unique=on&format=plain&rnd=new" 
 	resp, err := http.Get(url)
 	// handle the error if there is one
 	if err != nil {
