@@ -48,7 +48,25 @@ Channels
 		<-ch0 //pull an int and discard it
 		var y := <-ch0 //it can also be used like this
 	- NOTE the spacing with the arrow when sending vs recieving. I think it will compile regardless of the spacing, but it may mess with the editor
+	- Channels can be closed with close(), but it is not necessary. If you try to pull from a closed channel, you get a zero value
+	- Channels are bi directional by default, but can be restricted
+		var recvOnly <-chan int
+		var sendOnly chan<- int
+	- Channels have a control structure called "select", which functions similarly to a switch statement. Case statements must be channels
 
+		select{	
+			case x := <-ch0
+				fmt.Println(x)
+			case y := <-ch1
+				fmt.Println(y)
+			case z := <-ch2
+				fmt.Println(x)
+			default:
+				fmt.Println("default")	
+		}
+
+	- Basically it checks all channels in the statement to see if any are ready to recieve
+	- If none are ready, it defaults. If there is no default, it blocks. If more than 1 is ready it "fairly" randomly selects one to recieve
 
 ======================================================================================
 
