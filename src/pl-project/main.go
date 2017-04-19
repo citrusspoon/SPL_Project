@@ -12,23 +12,9 @@ import (
 func main() {
 
 
-	//var registers = []*Register{store.MakeRegister(), store.MakeRegister()}
-	/*
-	var register0 = store.MakeRegister()
-	var register1 = store.MakeRegister()
-	var register2 = store.MakeRegister()
-	var register3 = store.MakeRegister()
-	var register4 = store.MakeRegister()
-	*/
-/*
-	for j := 0; j < 5; j++ {
 	
-		registers[j] = store.MakeRegister()
-	
-	}
-*/
 	register := store.MakeRegister()
-	queue := store.MakeQueue()
+	//queue := store.MakeQueue()
 
 	minutes := 10
 
@@ -36,13 +22,13 @@ func main() {
 		if store.IsCustomerAdded() {
 			customer := store.MakeCustomer()
 			fmt.Println("New Customer is in the line!", customer.ToString())
-			queue.Enqueue(customer)
+			register.Line.Enqueue(customer)
 		}
 
-		if queue.Peek() != nil && queue.Peek().Service() {
-			fmt.Println("Customer with ID", queue.Peek().ID, "has been serviced.")
-			register.Money.Add(store.Price(queue.Peek().Items))
-			queue.Dequeue()
+		if register.Line.Peek() != nil && register.Line.Peek().Service() {
+			fmt.Println("Customer with ID", register.Line.Peek().ID, "has been serviced.")
+			register.Money.Add(store.Price(register.Line.Peek().Items))
+			register.Line.Dequeue()
 		}
 	}
 
