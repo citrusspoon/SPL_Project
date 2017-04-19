@@ -6,10 +6,27 @@ package main
 import (
 	"fmt"
 	store "pl-project/storeLibs"
+	//"reflect"
 )
 
 func main() {
 
+
+	//var registers = []*Register{store.MakeRegister(), store.MakeRegister()}
+	/*
+	var register0 = store.MakeRegister()
+	var register1 = store.MakeRegister()
+	var register2 = store.MakeRegister()
+	var register3 = store.MakeRegister()
+	var register4 = store.MakeRegister()
+	*/
+/*
+	for j := 0; j < 5; j++ {
+	
+		registers[j] = store.MakeRegister()
+	
+	}
+*/
 	register := store.MakeRegister()
 	queue := store.MakeQueue()
 
@@ -31,4 +48,5 @@ func main() {
 
 	fmt.Println("\n\nFinished running for", minutes, "minutes!")
 	fmt.Println("In this time, register", register.ID, "made", register.Money.ToString())
+	//fmt.Println(reflect.TypeOf(register))
 }

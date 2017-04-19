@@ -3,6 +3,7 @@ package storeLibs
 import (
 	"math/rand"
 	"time"
+	
 )
 
 type Item struct {
@@ -48,6 +49,7 @@ func GetItems() []*Item {
 	var items []*Item
 
 	s := rand.NewSource(time.Now().UnixNano() + int64(rand.Intn(1000000)))
+	//s := rand.NewSource(trueRandomSeed())
 	r := rand.New(s)
 
 	const maxPossibleItems = 15
@@ -63,3 +65,5 @@ func GetItems() []*Item {
 
 	return items
 }
+
+
