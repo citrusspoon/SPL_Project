@@ -45,13 +45,13 @@ func MakeCustomer() *Customer {
 	return &Customer{currentID, secondsPerItem * len(items), items, nil}
 }
 
-// 1% chance someone is added per second
+// 50% chance someone is added per second
 func IsCustomerAdded() bool {
 	s := rand.NewSource(time.Now().UnixNano() + int64(rand.Intn(1000000)))
 	//s := rand.NewSource(trueRandomSeed())
 	r := rand.New(s)
 
-	return r.Intn(100) == 0
+	return r.Intn(100) < 50
 }
 
 func trueRandomSeed() int64{

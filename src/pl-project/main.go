@@ -7,6 +7,7 @@ import (
 	"fmt"
 	store "pl-project/storeLibs"
 	"sync"
+	"time"
 	//"reflect"
 )
 
@@ -27,49 +28,88 @@ func main() {
 
 	var wg sync.WaitGroup
 	minutes := 10
-	var register0 = store.MakeRegister(0, 0, 6, false)
+	var waitLine = store.MakeQueue();
+	var register0 = store.MakeRegister(0, 0, 6, false)	
 	var register1 = store.MakeRegister(1, 0, 6, false)
 	//var register2 = store.MakeRegister(2, 0, 6, false)
+	var reg0ch = make(chan *Customer)
+	var reg1ch = make(chan *Customer)
 
 	
-	wg.Add(2) //Adds active registers to the WaitGroup to prevent main() from terminating them
+	wg.Add(3) //Adds active registers to the WaitGroup to prevent main() from terminating them
+
+
+
+	go func(){
+
+		for minute := 0; minute < 60*minutes; minute++ {
+			if store.IsCustomerAdded() {
+				customer := store.MakeCustomer()
+				fmt.Println("New Customer is in the line!", customer.ToString())
+				waitLine.Line.Enqueue(customer)
+
+				select {	
+				case x := <-reg0ch
+					reg0ch <- waitLine.Line.Peek()
+					waitLine.Line.Dequeue()
+				case x := <-reg1ch
+					reg1ch <- waitLine.Line.Peek()
+					waitLine.Line.Dequeue()
+				default:
+					fmt.Println("Waiting for open register")	
+				}
+
+
+
+
+
+			}
+
+		}
+		
+
+		for !waitLine.IsEmpty() {
+
+			select {	
+				case x := <-reg0ch
+					reg0ch <- waitLine.Line.Peek()
+					waitLine.Line.Dequeue()
+				case x := <-reg1ch
+					reg1ch <- waitLine.Line.Peek()
+					waitLine.Line.Dequeue()
+				default:
+					fmt.Println("Waiting for open register")	
+				}
+
+
+
+		}
+
+
+
+		wg.Done()
+	}()
+
+
+
+
+
+
+
+
 
 	//Anonymous function for register0
 	go func() {
         
 		
-		for minute := 0; minute < 60*minutes; minute++ {
-			if store.IsCustomerAdded() {
-				customer := store.MakeCustomer()
-				fmt.Println("New Customer is in the line!", customer.ToString())
-				register0.Line.Enqueue(customer)
-			}
-
-			if register0.Line.Peek() != nil && register0.Line.Peek().Service() {
-				fmt.Println("Customer with ID", register0.Line.Peek().ID, "has been serviced.")
-				register0.Money.Add(store.Price(register0.Line.Peek().Items))
-				register0.Line.Dequeue()
-			}
-		}
+		
 		wg.Done() //signals register is done servicing
     }()
 
 	go func() {
         
 		
-		for minute := 0; minute < 60*minutes; minute++ {
-			if store.IsCustomerAdded() {
-				customer := store.MakeCustomer()
-				fmt.Println("New Customer is in the line!", customer.ToString())
-				register1.Line.Enqueue(customer)
-			}
-
-			if register1.Line.Peek() != nil && register1.Line.Peek().Service() {
-				fmt.Println("Customer with ID", register1.Line.Peek().ID, "has been serviced.")
-				register1.Money.Add(store.Price(register1.Line.Peek().Items))
-				register1.Line.Dequeue()
-			}
-		}
+	
 		wg.Done() //signals register is done servicing
     }()
 
@@ -105,3 +145,33 @@ func startRegister(){
 	fmt.Println("In this time, register", register.ID, "made", register.Money.ToString())
 
 }*/
+
+
+
+
+
+
+
+
+
+/*
+for minute := 0; minute < 60*minutes; minute++ {
+			if store.IsCustomerAdded() {
+				customer := store.MakeCustomer()
+				fmt.Println("New Customer is in the line!", customer.ToString())
+				register0.Line.Enqueue(customer)
+			}
+
+			if register0.Line.Peek() != nil && register0.Line.Peek().Service() {
+				fmt.Println("Customer with ID", register0.Line.Peek().ID, "has been serviced.")
+				register0.Money.Add(store.Price(register0.Line.Peek().Items))
+				register0.Line.Dequeue()
+			}
+		}
+
+
+
+
+
+
+*/
