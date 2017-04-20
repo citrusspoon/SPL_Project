@@ -36,6 +36,30 @@ func main() {
 	var reg1ch = make(chan *Customer)
 
 	
+	//for purposes of sending/generating customers
+	timeout := make(chan bool, 1)
+	go func() {
+    	time.Sleep(1 * time.Second)
+    	timeout <- true
+	}()
+
+
+	/* 
+	//put this in the register goroutine after each time it finishes servicing someone
+	select {
+		case <-ch:
+    // a read from ch has occurred
+		case <-timeout:
+    // the read from ch has timed out
+}
+	
+	
+	
+	*/
+
+
+
+
 	wg.Add(3) //Adds active registers to the WaitGroup to prevent main() from terminating them
 
 
@@ -45,19 +69,10 @@ func main() {
 		for minute := 0; minute < 60*minutes; minute++ {
 			if store.IsCustomerAdded() {
 				customer := store.MakeCustomer()
-				fmt.Println("New Customer is in the line!", customer.ToString())
+				fmt.Println("New Customer is in the wait line!", customer.ToString())
 				waitLine.Line.Enqueue(customer)
 
-				select {	
-				case x := <-reg0ch
-					reg0ch <- waitLine.Line.Peek()
-					waitLine.Line.Dequeue()
-				case x := <-reg1ch
-					reg1ch <- waitLine.Line.Peek()
-					waitLine.Line.Dequeue()
-				default:
-					fmt.Println("Waiting for open register")	
-				}
+				
 
 
 
@@ -70,16 +85,7 @@ func main() {
 
 		for !waitLine.IsEmpty() {
 
-			select {	
-				case x := <-reg0ch
-					reg0ch <- waitLine.Line.Peek()
-					waitLine.Line.Dequeue()
-				case x := <-reg1ch
-					reg1ch <- waitLine.Line.Peek()
-					waitLine.Line.Dequeue()
-				default:
-					fmt.Println("Waiting for open register")	
-				}
+			
 
 
 
