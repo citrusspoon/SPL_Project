@@ -51,7 +51,7 @@ func IsCustomerAdded() bool {
 	//s := rand.NewSource(trueRandomSeed())
 	r := rand.New(s)
 
-	return r.Intn(100) == 0
+	return r.Intn(100) < 2
 }
 
 func trueRandomSeed() int64{
