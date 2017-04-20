@@ -10,6 +10,19 @@ import (
 	//"reflect"
 )
 
+
+/*
+Stuff to do
+----------------
+- Enforce max line size
+- Create queue of people waiting to move to a non-full line
+- Try to implement channels and a select statement to facilitate the above task
+- Possibly move customer generation out of the register goroutine and into a "waiting line" goroutine
+- Use channels to signal when time is over to stop generating customers?
+
+
+*/
+
 func main() {
 
 	var wg sync.WaitGroup
