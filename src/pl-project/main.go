@@ -7,7 +7,8 @@ import (
 	"fmt"
 	store "pl-project/storeLibs"
 	"sync"
-	"time"
+	"strconv"
+	//"time"
 	//"reflect"
 )
 
@@ -28,12 +29,13 @@ func main() {
 
 	var wg sync.WaitGroup
 	minutes := 10
+	storeOpen := true
 	var waitLine = store.MakeQueue();
-	var register0 = store.MakeRegister(0, 0, 6, false)	
-	var register1 = store.MakeRegister(1, 0, 6, false)
+	var register0 = store.MakeRegister(0, 0, 1, false)	
+	var register1 = store.MakeRegister(1, 0, 1, false)
 	//var register2 = store.MakeRegister(2, 0, 6, false)
-	var ch0 = make(chan *Customer)
-	var ch1 = make(chan *Customer)
+	var ch0 = make(chan *(store.Customer))
+	var ch1 = make(chan *(store.Customer))
 
 	
 	/*
@@ -56,17 +58,17 @@ func main() {
 			if store.IsCustomerAdded() {
 				customer := store.MakeCustomer()
 				fmt.Println("New Customer is in the wait line!", customer.ToString())
-				waitLine.Line.Enqueue(customer)
+				waitLine.Enqueue(customer)
 
 				//Checks to see if a register is open, and sends the first customer via a channel
 				select {
 
-					case ch0 <- waitLine.Line.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 0.")
-						waitLine.Line.Dequeue()
-					case ch1 <- waitLine.Line.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 1.")
-						waitLine.Line.Dequeue()
+					case ch0 <- waitLine.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + " to register 0.")
+						waitLine.Dequeue()
+					case ch1 <- waitLine.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + " to register 1.")
+						waitLine.Dequeue()
 					default: 
 						fmt.Println("No open register")
 				}
@@ -77,16 +79,18 @@ func main() {
 
 		}
 		//Finishes processing leftover customers after the time is up
-		for !waitLine.Line.IsEmpty(){
+		
+		fmt.Println("done generating")
+		for !waitLine.IsEmpty(){
 
 			select {
 
-					case ch0 <- waitLine.Line.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 0.")
-						waitLine.Line.Dequeue()
-					case ch1 <- waitLine.Line.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 1.")
-						waitLine.Line.Dequeue()
+					case ch0 <- waitLine.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + "to register 0.")
+						waitLine.Dequeue()
+					case ch1 <- waitLine.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + "to register 1.")
+						waitLine.Dequeue()
 					default: 
 						fmt.Println("No open register")
 				}
@@ -94,7 +98,7 @@ func main() {
 
 		}
 
-
+		storeOpen = false
 		wg.Done()
 	}()
 
@@ -109,17 +113,52 @@ func main() {
 	//Anonymous function for register0
 	go func() {
         
-		
-		
+		for !waitLine.IsEmpty() || storeOpen {
+
+			//will block until a customer is sent to be enqueued
+			register0.Line.Enqueue(<-ch0)
+
+			if register0.Line.Peek().Service() {
+				fmt.Println("Customer with ID", register0.Line.Peek().ID, "has been serviced at register 0.")
+				register0.Money.Add(store.Price(register0.Line.Peek().Items))
+				register0.Line.Dequeue()
+
+			}
+
+
+
+		}
+
 		wg.Done() //signals register is done servicing
     }()
 
+
+	//Anonymous function for register1
 	go func() {
         
-		
-	
+		for !waitLine.IsEmpty() || storeOpen {
+
+			//will block until a customer is sent to be enqueued
+			register1.Line.Enqueue(<-ch1)
+
+			if register1.Line.Peek().Service() {
+				fmt.Println("Customer with ID", register1.Line.Peek().ID, "has been serviced at register 1.")
+				register1.Money.Add(store.Price(register1.Line.Peek().Items))
+				register1.Line.Dequeue()
+
+			}
+
+
+
+		}
+
 		wg.Done() //signals register is done servicing
     }()
+
+	
+
+
+
 
 
 	wg.Wait() //waits until all goroutines are finished before continuing
