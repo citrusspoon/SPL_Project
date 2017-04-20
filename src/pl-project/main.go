@@ -32,38 +32,24 @@ func main() {
 	var register0 = store.MakeRegister(0, 0, 6, false)	
 	var register1 = store.MakeRegister(1, 0, 6, false)
 	//var register2 = store.MakeRegister(2, 0, 6, false)
-	var reg0ch = make(chan *Customer)
-	var reg1ch = make(chan *Customer)
+	var ch0 = make(chan *Customer)
+	var ch1 = make(chan *Customer)
 
 	
-	//for purposes of sending/generating customers
+	/*
 	timeout := make(chan bool, 1)
 	go func() {
     	time.Sleep(1 * time.Second)
     	timeout <- true
 	}()
-
-
-	/* 
-	//put this in the register goroutine after each time it finishes servicing someone
-	select {
-		case <-ch:
-    // a read from ch has occurred
-		case <-timeout:
-    // the read from ch has timed out
-}
-	
-	
-	
-	*/
-
+*/
 
 
 
 	wg.Add(3) //Adds active registers to the WaitGroup to prevent main() from terminating them
 
 
-
+	//goroutine to generate customers for the waiting line 
 	go func(){
 
 		for minute := 0; minute < 60*minutes; minute++ {
@@ -72,25 +58,41 @@ func main() {
 				fmt.Println("New Customer is in the wait line!", customer.ToString())
 				waitLine.Line.Enqueue(customer)
 
-				
+				//Checks to see if a register is open, and sends the first customer via a channel
+				select {
 
-
+					case ch0 <- waitLine.Line.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 0.")
+						waitLine.Line.Dequeue()
+					case ch1 <- waitLine.Line.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 1.")
+						waitLine.Line.Dequeue()
+					default: 
+						fmt.Println("No open register")
+				}
 
 
 
 			}
 
 		}
-		
+		//Finishes processing leftover customers after the time is up
+		for !waitLine.Line.IsEmpty(){
 
-		for !waitLine.IsEmpty() {
+			select {
 
-			
-
+					case ch0 <- waitLine.Line.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 0.")
+						waitLine.Line.Dequeue()
+					case ch1 <- waitLine.Line.Peek():
+						fmt.Println("Sent " + strconv.Itoa(waitLine.Line.Peek()) + "to register 1.")
+						waitLine.Line.Dequeue()
+					default: 
+						fmt.Println("No open register")
+				}
 
 
 		}
-
 
 
 		wg.Done()

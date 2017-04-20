@@ -55,11 +55,11 @@ Channels
 	- Channels have a control structure called "select", which functions similarly to a switch statement. Case statements must be channels
 
 		select{	
-			case x := <-ch0
+			case x := <-ch0:
 				fmt.Println(x)
-			case y := <-ch1
+			case y := <-ch1:
 				fmt.Println(y)
-			case z := <-ch2
+			case z := <-ch2:
 				fmt.Println(x)
 			default:
 				fmt.Println("default")	
@@ -77,6 +77,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
 	//"time"
 	"math/rand"
 	//"strings"
@@ -84,15 +85,34 @@ import (
 
 func main() {
 
-	
+	var wg sync.WaitGroup
 	s := rand.NewSource(trueRandomSeed())
 	r := rand.New(s)
+	var ch0 = make(chan int)
 
 	fmt.Println(r.Intn(100))
 
+	wg.Add(1)
+	go func(){
+		fmt.Println("start")
+		select{
+			case ch0 <- 5:
+				fmt.Println("sent 5")
+			default: 
+				fmt.Println("default")
+				fmt.Println("default2")
+		}
+
+		wg.Done()
+	}()
+
+
+	y := <- ch0
+
+	fmt.Println(y)
 	
 
-
+	wg.Wait()
 }
 
 func trueRandomSeed() int64{
