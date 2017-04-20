@@ -54,36 +54,27 @@ func main() {
 	*/
 
 	//Timeout Goroutines
-	go func() {
-    	
+	go func() {	
 		for !waitLine.IsEmpty() || storeOpen {
-		
 			time.Sleep(1 * time.Second)
     		timeout[0] <- true
-		}
-		
+		}	
 		wg.Done()
 	}()
 
 	go func() {
-    	
 		for !waitLine.IsEmpty() || storeOpen {
-		
 			time.Sleep(1 * time.Second)
     		timeout[1] <- true
 		}
-		
 		wg.Done()
 	}()
 
 	go func() {
-    	
 		for !waitLine.IsEmpty() || storeOpen {
-		
 			time.Sleep(1 * time.Second)
     		timeout[2] <- true
 		}
-		
 		wg.Done()
 	}()
 
@@ -206,7 +197,7 @@ func main() {
 
 
 }
-
+/*
 func startTimeoutFunctions() {
 
 
@@ -214,7 +205,7 @@ func startTimeoutFunctions() {
 
 
 
-/*
+
 
 func startRegister(){
 
