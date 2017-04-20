@@ -16,11 +16,7 @@ import (
 /*
 Stuff to do
 ----------------
-- Enforce max line size
-- Create queue of people waiting to move to a non-full line
-- Try to implement channels and a select statement to facilitate the above task
-- Possibly move customer generation out of the register goroutine and into a "waiting line" goroutine
-- Use channels to signal when time is over to stop generating customers?
+- Move some stuff to other functions to clean up the main()
 
 
 */
@@ -37,6 +33,12 @@ func main() {
 	var ch0 = make(chan *(store.Customer))
 	var ch1 = make(chan *(store.Customer))
 	wg.Add(5) //Adds active goroutines to the WaitGroup to prevent main() from terminating them
+	/*
+		Timeout functions x2
+		Wait Line
+		Regiser 0
+		Register 1
+	*/
 
 	//To prevent registers from deadlocking
 	timeout := make(chan bool, 1)
@@ -82,7 +84,6 @@ func main() {
 				customer := store.MakeCustomer()
 				fmt.Println("New Customer is in the wait line!", customer.ToString())
 				waitLine.Enqueue(customer)
-
 				//Checks to see if a register is open, and sends the first customer via a channel
 				select {
 
@@ -106,6 +107,7 @@ func main() {
 		fmt.Println("done generating")
 		for !waitLine.IsEmpty(){
 
+			
 			select {
 
 					case ch0 <- waitLine.Peek():
@@ -159,6 +161,7 @@ func main() {
 				fmt.Println("Customer with ID", register0.Line.Peek().ID, "has been serviced at register 0.")
 				register0.Money.Add(store.Price(register0.Line.Peek().Items))
 				register0.Line.Dequeue()
+				register0.TotalCustomersServiced++
 
 			}
 
@@ -194,6 +197,7 @@ func main() {
 				fmt.Println("Customer with ID", register1.Line.Peek().ID, "has been serviced at register 1.")
 				register1.Money.Add(store.Price(register1.Line.Peek().Items))
 				register1.Line.Dequeue()
+				register1.TotalCustomersServiced++
 
 			}
 
@@ -214,10 +218,20 @@ func main() {
 	wg.Wait() //waits until all goroutines are finished before continuing
 
 	fmt.Println("\n\nFinished running for", minutes, "minutes!")
-	fmt.Println("In this time, register", register0.ID, "made", register0.Money.ToString())
-	fmt.Println("In this time, register", register1.ID, "made", register1.Money.ToString())
+	fmt.Println("In this time, register", register0.ID, "serviced", register0.TotalCustomersServiced,  "customers, and made", register0.Money.ToString())
+	fmt.Println("In this time, register", register1.ID, "serviced", register0.TotalCustomersServiced,  "customers, and made", register1.Money.ToString())
 
 }
+
+
+
+
+
+
+
+
+
+
 /*
 
 //I can't figure out how to pass the Register into this, so if someone else figures it out we can use this in main instead of anonymous functions to make it look better
