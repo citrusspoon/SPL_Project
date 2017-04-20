@@ -13,17 +13,18 @@ import (
 func main() {
 
 	var wg sync.WaitGroup
+	minutes := 10
 	var register0 = store.MakeRegister(0, 0, 6, false)
-	//var register1 = store.MakeRegister(1, 0, 6, false)
+	var register1 = store.MakeRegister(1, 0, 6, false)
 	//var register2 = store.MakeRegister(2, 0, 6, false)
 
 	
-	wg.Add(1) //Adds active registers to the WaitGroup to prevent main() from terminating them
+	wg.Add(2) //Adds active registers to the WaitGroup to prevent main() from terminating them
 
 	//Anonymous function for register0
 	go func() {
         
-		minutes := 10
+		
 		for minute := 0; minute < 60*minutes; minute++ {
 			if store.IsCustomerAdded() {
 				customer := store.MakeCustomer()
@@ -37,15 +38,34 @@ func main() {
 				register0.Line.Dequeue()
 			}
 		}
+		wg.Done() //signals register is done servicing
+    }()
 
-		fmt.Println("\n\nFinished running for", minutes, "minutes!")
-		fmt.Println("In this time, register", register0.ID, "made", register0.Money.ToString())
+	go func() {
+        
+		
+		for minute := 0; minute < 60*minutes; minute++ {
+			if store.IsCustomerAdded() {
+				customer := store.MakeCustomer()
+				fmt.Println("New Customer is in the line!", customer.ToString())
+				register1.Line.Enqueue(customer)
+			}
+
+			if register1.Line.Peek() != nil && register1.Line.Peek().Service() {
+				fmt.Println("Customer with ID", register1.Line.Peek().ID, "has been serviced.")
+				register1.Money.Add(store.Price(register1.Line.Peek().Items))
+				register1.Line.Dequeue()
+			}
+		}
 		wg.Done() //signals register is done servicing
     }()
 
 
 	wg.Wait() //waits until all goroutines are finished before continuing
 
+	fmt.Println("\n\nFinished running for", minutes, "minutes!")
+	fmt.Println("In this time, register", register0.ID, "made", register0.Money.ToString())
+	fmt.Println("In this time, register", register1.ID, "made", register1.Money.ToString())
 
 }
 /*
