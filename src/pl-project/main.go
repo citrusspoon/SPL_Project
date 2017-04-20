@@ -8,7 +8,7 @@ import (
 	store "pl-project/storeLibs"
 	"sync"
 	"strconv"
-	//"time"
+	"time"
 	//"reflect"
 )
 
@@ -36,19 +36,42 @@ func main() {
 	//var register2 = store.MakeRegister(2, 0, 6, false)
 	var ch0 = make(chan *(store.Customer))
 	var ch1 = make(chan *(store.Customer))
+	wg.Add(5) //Adds active goroutines to the WaitGroup to prevent main() from terminating them
+
+	//To prevent registers from deadlocking
+	timeout := make(chan bool, 1)
+	timeout2 := make(chan bool, 1)
+	
+	
+	go func() {
+    	
+		for !waitLine.IsEmpty() || storeOpen {
+		
+			time.Sleep(1 * time.Second)
+    		timeout <- true
+		}
+		
+		wg.Done()
+		fmt.Println("timeout done triggered")
+	}()
+
+	go func() {
+    	
+		for !waitLine.IsEmpty() || storeOpen {
+		
+			time.Sleep(1 * time.Second)
+    		timeout2 <- true
+		}
+		
+		wg.Done()
+		fmt.Println("timeout2 done triggered")
+	}()
+
+
+
+
 
 	
-	/*
-	timeout := make(chan bool, 1)
-	go func() {
-    	time.Sleep(1 * time.Second)
-    	timeout <- true
-	}()
-*/
-
-
-
-	wg.Add(3) //Adds active registers to the WaitGroup to prevent main() from terminating them
 
 
 	//goroutine to generate customers for the waiting line 
@@ -64,10 +87,10 @@ func main() {
 				select {
 
 					case ch0 <- waitLine.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + " to register 0.")
+						fmt.Println("Sent customer " + strconv.Itoa(waitLine.Peek().ID) + " to register 0.")
 						waitLine.Dequeue()
 					case ch1 <- waitLine.Peek():
-						fmt.Println("Sent " + strconv.Itoa(waitLine.Peek().ID) + " to register 1.")
+						fmt.Println("Sent customer " + strconv.Itoa(waitLine.Peek().ID) + " to register 1.")
 						waitLine.Dequeue()
 					default: 
 						fmt.Println("No open register")
@@ -100,6 +123,7 @@ func main() {
 
 		storeOpen = false
 		wg.Done()
+		fmt.Println("waitline done triggered")
 	}()
 
 
@@ -115,10 +139,23 @@ func main() {
         
 		for !waitLine.IsEmpty() || storeOpen {
 
-			//will block until a customer is sent to be enqueued
-			register0.Line.Enqueue(<-ch0)
+			
+			
+			
 
-			if register0.Line.Peek().Service() {
+			select {
+
+				case nextCustomer := <-ch0:
+					register0.Line.Enqueue(nextCustomer)
+				case <-timeout:
+					//register times out
+
+			}
+
+
+
+
+			if register0.Line.Peek() != nil && register0.Line.Peek().Service() {
 				fmt.Println("Customer with ID", register0.Line.Peek().ID, "has been serviced at register 0.")
 				register0.Money.Add(store.Price(register0.Line.Peek().Items))
 				register0.Line.Dequeue()
@@ -130,6 +167,7 @@ func main() {
 		}
 
 		wg.Done() //signals register is done servicing
+		fmt.Println("reg0 done triggered")
     }()
 
 
@@ -138,10 +176,21 @@ func main() {
         
 		for !waitLine.IsEmpty() || storeOpen {
 
-			//will block until a customer is sent to be enqueued
-			register1.Line.Enqueue(<-ch1)
 
-			if register1.Line.Peek().Service() {
+
+			select {
+
+				case nextCustomer := <-ch1:
+					register1.Line.Enqueue(nextCustomer)
+				case <-timeout2:
+					//register times out
+
+			}
+
+
+
+
+			if register1.Line.Peek() != nil && register1.Line.Peek().Service() {
 				fmt.Println("Customer with ID", register1.Line.Peek().ID, "has been serviced at register 1.")
 				register1.Money.Add(store.Price(register1.Line.Peek().Items))
 				register1.Line.Dequeue()
@@ -153,6 +202,7 @@ func main() {
 		}
 
 		wg.Done() //signals register is done servicing
+		fmt.Println("reg1 done triggered")
     }()
 
 	
