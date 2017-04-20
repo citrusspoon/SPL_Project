@@ -7,8 +7,8 @@ type Queue struct {
 	Size        int
 }
 
-func MakeQueue() *Queue {
-	return &Queue{nil, nil, 0}
+func MakeQueue(s int) *Queue {
+	return &Queue{nil, nil, s}
 }
 
 func (queue *Queue) IsEmpty() bool {

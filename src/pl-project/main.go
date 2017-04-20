@@ -13,7 +13,7 @@ func main() {
 
 
 	
-	register := store.MakeRegister()
+	register := store.MakeRegister(0, 0, 6, false)
 	//queue := store.MakeQueue()
 
 	minutes := 10

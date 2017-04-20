@@ -9,8 +9,8 @@ type Register struct {
 	Line			   *Queue
 }
 
-func MakeRegister() *Register {
-	return &Register{0, 0, 0, false, &Money{0, 0}, MakeQueue()}
+func MakeRegister(i int, qs int, mqs int, ser bool) *Register {
+	return &Register{i, qs, mqs, ser, &Money{0, 0}, MakeQueue(mqs)}
 }
 
 
