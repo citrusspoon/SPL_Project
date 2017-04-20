@@ -17,8 +17,8 @@ import (
 Stuff to do
 ----------------
 - Move some stuff to other functions to clean up the main()
-- Figure out why the money and total customers isnt being counted
-
+- Make the customers actually be serviced
+- Remove obsolete stuff when we get closer to finishing
 
 
 */
@@ -32,7 +32,7 @@ func main() {
 
 	var register = []*(store.Register){
 		store.MakeRegister(0, 0, 1, false), 
-		store.MakeRegister(0, 0, 1, false),
+		store.MakeRegister(1, 0, 1, false),
 	}
 	var channel = []chan *(store.Customer) {
    		make(chan *(store.Customer)),
@@ -166,11 +166,14 @@ func main() {
 			}
 
 
-			if register[0].Line.Peek() != nil && register[0].Line.Peek().Service() {
-				fmt.Println("Customer with ID", register[0].Line.Peek().ID, "has been serviced at register 0.")
-				register[0].Money.Add(store.Price(register[0].Line.Peek().Items))
-				register[0].Line.Dequeue()
-				register[0].TotalCustomersServiced++
+			for register[0].Line.Peek() != nil && !register[0].Line.Peek().HasBeenServiced() {
+				
+				if (register[0].Line.Peek().Service()) {
+					fmt.Println("Customer with ID", register[0].Line.Peek().ID, "has been serviced at register 0.")
+					register[0].Money.Add(store.Price(register[0].Line.Peek().Items))
+					register[0].Line.Dequeue()
+					register[0].TotalCustomersServiced++
+				}
 
 			}
 
@@ -202,11 +205,15 @@ func main() {
 
 
 
-			if register[1].Line.Peek() != nil && register[1].Line.Peek().Service() {
-				fmt.Println("Customer with ID", register[1].Line.Peek().ID, "has been serviced at register 1.")
-				register[1].Money.Add(store.Price(register[1].Line.Peek().Items))
-				register[1].Line.Dequeue()
-				register[1].TotalCustomersServiced++
+			for register[1].Line.Peek() != nil && !register[1].Line.Peek().HasBeenServiced() {
+				
+				
+				if (register[1].Line.Peek().Service()) {
+					fmt.Println("Customer with ID", register[1].Line.Peek().ID, "has been serviced at register 1.")
+					register[1].Money.Add(store.Price(register[1].Line.Peek().Items))
+					register[1].Line.Dequeue()
+					register[1].TotalCustomersServiced++
+				}
 
 			}
 
@@ -228,7 +235,7 @@ func main() {
 
 	fmt.Println("\n\nFinished running for", minutes, "minutes!")
 	fmt.Println("In this time, register", register[0].ID, "serviced", register[0].TotalCustomersServiced,  "customers, and made", register[0].Money.ToString())
-	fmt.Println("In this time, register", register[1].ID, "serviced", register[0].TotalCustomersServiced,  "customers, and made", register[1].Money.ToString())
+	fmt.Println("In this time, register", register[1].ID, "serviced", register[1].TotalCustomersServiced,  "customers, and made", register[1].Money.ToString())
 
 }
 
