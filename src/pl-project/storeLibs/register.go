@@ -10,7 +10,7 @@ type Register struct {
 }
 
 func MakeRegister(i int, qs int, mqs int, ser bool) *Register {
-	return &Register{i, qs, mqs, ser, &Money{0, 0}, MakeQueue(mqs)}
+	return &Register{i, qs, mqs, ser, &Money{0, 0}, MakeQueue()}
 }
 
 
