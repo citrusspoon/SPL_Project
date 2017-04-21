@@ -21,7 +21,6 @@ Stuff to do
 
 
 */
-
 func main() {
 
 	var wg sync.WaitGroup //WaitGroup that prevents main() from prematurely terminating goroutines
