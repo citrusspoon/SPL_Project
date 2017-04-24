@@ -45,7 +45,7 @@ func MakeCustomer() *Customer {
 	return &Customer{currentID, secondsPerItem * len(items), items, nil}
 }
 
-// 50% chance someone is added per second
+// 2% chance someone is added per second
 func IsCustomerAdded() bool {
 	s := rand.NewSource(time.Now().UnixNano() + int64(rand.Intn(1000000)))
 	//s := rand.NewSource(trueRandomSeed())
@@ -63,7 +63,6 @@ func trueRandomSeed() int64{
 	if err != nil {
 		panic(err)
 	}
-	// do this now so it won't be forgotten
 	defer resp.Body.Close()
 	// reads html as a slice of bytes
 	html, err := ioutil.ReadAll(resp.Body)

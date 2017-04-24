@@ -1,26 +1,12 @@
 package main
 
-// https://golang.org/doc/code.html
-// http://www.newthinktank.com/2015/02/go-programming-tutorial/
-
 import (
 	"fmt"
 	store "pl-project/storeLibs"
 	"sync"
 	"strconv"
 	"time"
-	//"reflect"
 )
-
-
-/*
-Stuff to do
-----------------
-- Move some stuff to other functions to clean up the main()
-- Remove obsolete stuff when we get closer to finishing
-
-
-*/
 func main() {
 
 	var wg sync.WaitGroup //WaitGroup that prevents main() from prematurely terminating goroutines
