@@ -1,11 +1,10 @@
 package storeLibs
 
 import (
-	"math/rand"
-	//"fmt"
-	"strconv"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -54,10 +53,10 @@ func IsCustomerAdded() bool {
 	return r.Intn(100) < 2
 }
 
-func trueRandomSeed() int64{
+func trueRandomSeed() int64 {
 
 	//Random.org true random number generator. Change the "len" number in the url to change the length
-	url := "https://www.random.org/strings/?num=1&len=18&digits=on&unique=on&format=plain&rnd=new" 
+	url := "https://www.random.org/strings/?num=1&len=18&digits=on&unique=on&format=plain&rnd=new"
 	resp, err := http.Get(url)
 	// handle the error if there is one
 	if err != nil {
@@ -79,10 +78,8 @@ func trueRandomSeed() int64{
 	//convert string to int64
 	x, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-    	panic(err)
+		panic(err)
 	}
 
-	return x;
-
-
+	return x
 }
