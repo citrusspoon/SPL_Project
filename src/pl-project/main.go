@@ -1,5 +1,14 @@
 package main
 
+/*
+Execution Instructions
+----------------------------------------
+Download and install appropriate version of Go from https://golang.org/dl/
+Navigate to “/src/pl-project/”
+Open a terminal window in the directory with “main.go”
+Enter “go run main.go” without quotes to run the program
+*/
+
 import (
 	"fmt"
 	store "pl-project/storeLibs"
